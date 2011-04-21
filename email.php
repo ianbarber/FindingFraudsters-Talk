@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Compare an email address to a name using edit distance
+ * Returns a float for quality of match, anything over 0.5 can be considered a good match
+ * 
+ * @param string $name 
+ * @param string $email 
+ * @return float -1 to 1
+ * @author Ian Barber
+ */
 function compareEmailToName($name, $email) {
     $name = strtolower($name);
     $parts = explode(" ", $name);
@@ -15,28 +24,23 @@ function compareEmailToName($name, $email) {
     }
     
     if(count($parts)) {
-        $lowest = 10;
+        $lowest = 8;
         foreach($parts as $part) {
-            var_dump('------------');
-            var_dump($part);
-            var_dump($user);
             $l = levenshtein($user, $part);
-            var_dump($l);
-            if($l < strlen($user) && $l < $lowest) {
+            if($l < strlen($part) && $l < $lowest) {
                 $lowest = $l;
             } 
-            var_dump($domain);
             $l = levenshtein($domain, $part);
-            var_dump($l);
-            if($l < strlen($domain) && $l < $lowest) {
+            if($l < strlen($part) && $l < $lowest) {
                 $lowest = $l;
             }
         }
-        return 0.8 - (0.1*$lowest);
+        return 0.7 - (0.2*$lowest);
     }
 }
 
-var_dump(compareEmailToName("ian barber", "ian@raegunne.com"));
-var_dump(compareEmailToName("ian barber", "ian.barber@gmail.com"));
+var_dump(compareEmailToName("ian barber", "ian@mydomain.com"));
+var_dump(compareEmailToName("ian barber", "ian.barber@email.com"));
 var_dump(compareEmailToName("ian barber", "me@ianbarber.com"));
-var_dump(compareEmailToName("ian barber", "gonzo@raegunne.com"));
+var_dump(compareEmailToName("ian barber", "gonzo@mydomain.com"));
+var_dump(compareEmailToName("johnny two times", "gonzo@mydomain.com"));
