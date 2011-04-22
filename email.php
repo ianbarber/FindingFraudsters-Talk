@@ -11,32 +11,39 @@
  */
 function compareEmailToName($name, $email) {
     $name = strtolower($name);
+    $email = strtolower($email);
     $parts = explode(" ", $name);
+    $percent = 0;
     
     list($user, $domain) = explode("@", $email);
+    $user = str_replace(array(".", "+"), " ", $user);
+    $domain = preg_replace("/\..*/", "", $domain);
     
-    $user = str_replace(".+", " ", $user);
-    
-    if(levenshtein($name, $user) < 3) {
+    similar_text($name, $user, $percent);
+    if($percent > 80) {
         return 1.0;
-    } else if(levenshtein($name, $domain) < 6) {
+    }
+    similar_text($name, $domain, $percent);
+    if($percent > 80) {
         return 0.8;
     }
     
     if(count($parts)) {
-        $lowest = 8;
+        $highest = 0;
         foreach($parts as $part) {
-            $l = levenshtein($user, $part);
-            if($l < strlen($part) && $l < $lowest) {
-                $lowest = $l;
+            similar_text($user, $part, $percent);
+            if($percent > 50 && $percent > $highest) {
+                $highest = $percent;
             } 
-            $l = levenshtein($domain, $part);
-            if($l < strlen($part) && $l < $lowest) {
-                $lowest = $l;
+            similar_text($domain, $part, $percent);
+            if($percent > 50 && $percent > $highest) {
+                $highest = $percent;
             }
         }
-        return 0.7 - (0.2*$lowest);
+        return (1.7 * ($highest/100)) - 1;
     }
+    
+    return -1;
 }
 
 var_dump(compareEmailToName("ian barber", "ian@mydomain.com"));
