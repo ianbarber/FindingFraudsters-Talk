@@ -49,6 +49,16 @@ function detect($sensitivity, $output = false) {
 		    
     			$fac = fac($data[1]);
     			$poisson = exp(-$estimate) * pow($estimate,$data[1]) / $fac;
+    			
+    			/*
+    			// More efficient online estimate
+    			$poisson = exp(-$estimate);
+                foreach(range(1, $data[1]) as $i) {
+                    $poisson *= $estimate;
+                    $poisson /= $i;
+                }
+                */
+    			
     			if($poisson < $sensitivity && $data[1] > $estimate) {
     				$alarmCount++;
     				if($i > 201) { 
